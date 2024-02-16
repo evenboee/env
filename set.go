@@ -33,7 +33,7 @@ type RequiredFieldError struct {
 }
 
 func (e *RequiredFieldError) Error() string {
-	return "required field: " + e.Field
+	return "missing required field: " + e.Field
 }
 
 type BindError struct {
@@ -152,13 +152,17 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 		return nil, false
 	}
 
+	if Debug {
+		fmt.Printf("tag value for %q: %s\n", field.Name, tagValue)
+	}
+
 	tg, err = parseTag(tagValue)
 	if err != nil {
 		return err, false
 	}
 
 	if tg.Name == tagValue && c.AutoFormatMissingKeys {
-		tg.Name = formatName(field.Name)
+		tg.Name = formatName(tg.Name)
 	}
 
 	if Debug {
@@ -259,7 +263,6 @@ func (c *SetParams) setWithType(value reflect.Value, field reflect.StructField, 
 			value.Set(reflect.New(value.Type().Elem()))
 		}
 
-		// return c.setWithType(value.Elem(), field, tg, val)
 		return c.setValue(value.Elem(), field, "", val)
 	}
 
