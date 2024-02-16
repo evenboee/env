@@ -157,7 +157,7 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 		return err, false
 	}
 
-	if tg.Name == "" && c.AutoFormatMissingKeys {
+	if tg.Name == tagValue && c.AutoFormatMissingKeys {
 		tg.Name = formatName(field.Name)
 	}
 
@@ -203,7 +203,7 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 		if !ok {
 			val = strings.Split(tg.Default, tg.DefaultValueSeparator)
 		}
-		return c.setSlice(value, field, tg, val), true
+		return c.setSlice(value, field, tg, val, prefix), true
 	case reflect.Array:
 		if !ok {
 			val = strings.Split(tg.Default, tg.DefaultValueSeparator)
@@ -215,16 +215,16 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 				Err:   fmt.Errorf("%q is not a valid length for %s", val, value.Type().String()),
 			}, false
 		}
-		return c.setArray(value, field, tg, val), true
+		return c.setArray(value, field, tg, val, prefix), true
 	default:
 		if !ok {
 			valS = tg.Default
 		}
-		return c.setWithType(value, field, tg, valS)
+		return c.setWithType(value, field, tg, valS, prefix)
 	}
 }
 
-func (c *SetParams) setWithType(value reflect.Value, field reflect.StructField, tg tag, val string) (error, bool) {
+func (c *SetParams) setWithType(value reflect.Value, field reflect.StructField, tg tag, val string, prefix string) (error, bool) {
 	switch value.Addr().Interface().(type) {
 	case StringUnmarshaler:
 		return value.Addr().Interface().(StringUnmarshaler).UnmarshalString(val), true
@@ -238,7 +238,7 @@ func (c *SetParams) setWithType(value reflect.Value, field reflect.StructField, 
 		case time.Time:
 			return setTimeField(val, field, value), true
 		}
-		return c.setStruct(val, value, field, tg), true
+		return c.setStruct(val, value, field, tg, prefix), true
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		switch value.Interface().(type) {
 		case time.Duration:
@@ -266,10 +266,13 @@ func (c *SetParams) setWithType(value reflect.Value, field reflect.StructField, 
 	return &UnsupportedTypeError{Type: value.Type()}, false
 }
 
-func (c *SetParams) setStruct(val string, value reflect.Value, field reflect.StructField, tg tag) error {
-	nPrefix := c.Prefix
+func (c *SetParams) setStruct(val string, value reflect.Value, field reflect.StructField, tg tag, prefix string) error {
+	nPrefix := prefix
 	if tg.Name != "" {
-		nPrefix += c.Sep + tg.Name
+		if nPrefix != "" {
+			nPrefix += c.Sep
+		}
+		nPrefix += tg.Name
 	}
 
 	t := value.Type()
@@ -292,9 +295,9 @@ func (c *SetParams) setStruct(val string, value reflect.Value, field reflect.Str
 	return nil
 }
 
-func (c *SetParams) setArray(value reflect.Value, field reflect.StructField, tg tag, vals []string) error {
+func (c *SetParams) setArray(value reflect.Value, field reflect.StructField, tg tag, vals []string, prefix string) error {
 	for i, s := range vals {
-		err, _ := c.setWithType(value.Index(i), field, tg, s)
+		err, _ := c.setWithType(value.Index(i), field, tg, s, prefix)
 		if err != nil {
 			return err
 		}
@@ -302,9 +305,9 @@ func (c *SetParams) setArray(value reflect.Value, field reflect.StructField, tg 
 	return nil
 }
 
-func (c *SetParams) setSlice(value reflect.Value, field reflect.StructField, tg tag, vals []string) error {
+func (c *SetParams) setSlice(value reflect.Value, field reflect.StructField, tg tag, vals []string, prefix string) error {
 	slice := reflect.MakeSlice(value.Type(), len(vals), len(vals))
-	err := c.setArray(slice, field, tg, vals)
+	err := c.setArray(slice, field, tg, vals, prefix)
 	if err != nil {
 		return err
 	}
