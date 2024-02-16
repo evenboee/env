@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/evenboee/env"
-	_ "github.com/evenboee/env/autoload"
 )
 
 type Config struct {
@@ -30,8 +29,32 @@ type Config struct {
 }
 
 func main() {
-	env.MustLoad("_example/.env")
+	env.MustLoad("_example/.env") // Load since path is not .env
 
 	conf := env.MustBind[Config]()
 	fmt.Printf("%+v\n", conf)
+
+	port := env.GetString("API_PORT")
+	fmt.Println("Port", port) // "" (empty)
+
+	maxConnections := env.MustGet[int]("MAX_CONNECTIONS,default=100")
+	fmt.Println("Max connections:", maxConnections) // 100
+
+	mystrings := env.MustGet[[]myString]("MY_STRING,default=hello world|welcome home,sep=|")
+	fmt.Println(mystrings) // ["hello world!" "welcome home!"]
+
+	pointer1 := env.MustGet[*int]("NUM1")
+	fmt.Println("Pointer1:", *pointer1) // 0
+
+	pointer2 := env.MustGet[*int]("NUM2,skip_on_no_value")
+	fmt.Println("Pointer2:", pointer2) // nil
+}
+
+type myString string
+
+var _ env.StringUnmarshaler = (*myString)(nil)
+
+func (ms *myString) UnmarshalString(s string) error {
+	*ms = myString(s) + "!"
+	return nil
 }
