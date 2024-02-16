@@ -125,7 +125,8 @@ func MustBind[T any](opts ...setParamsOpt) T {
 	return Must(Bind[T](opts...))
 }
 
+// Alias for Must(Get[string])
 func GetString(tg string, tags ...string) string {
-	s, _ := Get[string](tg, tags...)
+	s := MustGet[string](tg, tags...)
 	return s
 }
