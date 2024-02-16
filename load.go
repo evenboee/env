@@ -124,3 +124,8 @@ func Bind[T any](opts ...setParamsOpt) (T, error) {
 func MustBind[T any](opts ...setParamsOpt) T {
 	return Must(Bind[T](opts...))
 }
+
+func GetString(tg string, tags ...string) string {
+	s, _ := Get[string](tg, tags...)
+	return s
+}

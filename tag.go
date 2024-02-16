@@ -76,6 +76,9 @@ func (tg tag) Encode() string {
 	if tg.DefaultValueSeparator != "" {
 		parts = append(parts, fmt.Sprintf("separator=%s", tg.DefaultValueSeparator))
 	}
+	if tg.SkipOnNoValue {
+		parts = append(parts, "skip_on_no_value")
+	}
 
 	return strings.Join(parts, ",")
 }
