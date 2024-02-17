@@ -36,6 +36,10 @@ func parseTag(s string) (tag, error) {
 	parts := strings.Split(s, ",")
 	tg.Name = parts[0]
 
+	if tg.Name == "-" {
+		return tg, nil
+	}
+
 	for _, part := range parts[1:] {
 		switch part {
 		case "required", "require", "req":

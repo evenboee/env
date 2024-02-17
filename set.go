@@ -1,7 +1,6 @@
 package env
 
 import (
-	"encoding"
 	"fmt"
 	"os"
 	"reflect"
@@ -14,10 +13,6 @@ var Debug = false
 
 type StringUnmarshaler interface {
 	UnmarshalString(string) error
-}
-
-type TextUnmarshaler interface {
-	encoding.TextUnmarshaler
 }
 
 type UnsupportedTypeError struct {
@@ -137,39 +132,32 @@ func (c *SetParams) SetValue(obj any) error {
 }
 
 func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, prefix string, v string) (error, bool) {
-	var (
-		valS   = v
-		ok     = v != ""
-		tg     tag
-		envKey string
-		err    error
-	)
-
 	tagValue := field.Tag.Get(c.Tag)
-	if tagValue == "" {
-		tagValue = field.Name
-	} else if tagValue == "-" {
-		return nil, false
-	}
 
 	if Debug {
 		fmt.Printf("tag value for %q: %s\n", field.Name, tagValue)
 	}
 
-	tg, err = parseTag(tagValue)
+	tg, err := parseTag(tagValue)
 	if err != nil {
 		return err, false
 	}
 
-	if tg.Name == tagValue && c.AutoFormatMissingKeys {
-		tg.Name = formatName(tg.Name)
+	if tg.Name == "-" {
+		return nil, false
+	} else if tg.Name == "" {
+		tg.Name = field.Name
+
+		if c.AutoFormatMissingKeys {
+			tg.Name = formatName(field.Name)
+		}
 	}
 
 	if Debug {
-		fmt.Printf("tag for %q: %+v\n", field.Name, tg)
+		fmt.Printf("\ttag for %q: %+v\n", field.Name, tg)
 	}
 
-	envKey = prefix
+	envKey := prefix
 	if tg.Name != "" {
 		if envKey != "" {
 			envKey += c.Sep
@@ -177,14 +165,15 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 		envKey += tg.Name
 	}
 
-	valS, ok = os.LookupEnv(envKey)
+	valS, ok := os.LookupEnv(envKey)
 	if Debug {
 		if !ok {
-			fmt.Println("env key not found: ", envKey)
+			fmt.Println("\tenv key not found: ", envKey)
 		} else {
-			fmt.Printf("found env key: %s\n\t>> %s\n", envKey, valS)
+			fmt.Printf("\tfound env key: %s\n\t>> %s\n", envKey, valS)
 		}
 	}
+
 	if !ok && tg.Default == "" {
 		if tg.Required {
 			return &RequiredFieldError{
@@ -193,7 +182,7 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 		}
 		if tg.SkipOnNoValue {
 			if Debug {
-				fmt.Printf("skipping %q\n", envKey)
+				fmt.Printf("\tskipping %q\n", envKey)
 			}
 			return nil, false
 		}
@@ -232,8 +221,6 @@ func (c *SetParams) setWithType(value reflect.Value, field reflect.StructField, 
 	switch value.Addr().Interface().(type) {
 	case StringUnmarshaler:
 		return value.Addr().Interface().(StringUnmarshaler).UnmarshalString(val), true
-	case TextUnmarshaler:
-		return value.Addr().Interface().(TextUnmarshaler).UnmarshalText([]byte(val)), true
 	}
 
 	switch value.Kind() {
