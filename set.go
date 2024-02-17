@@ -47,7 +47,7 @@ func (e *BindError) Unwrap() error {
 
 type SetParams struct {
 	Prefix                string
-	Sep                   string
+	Separator             string
 	Tag                   string
 	SliceSeparator        string
 	AutoFormatMissingKeys bool
@@ -57,7 +57,7 @@ type SetParams struct {
 
 var DefualtSetParams = &SetParams{
 	Prefix:                "",
-	Sep:                   "_",
+	Separator:             "_",
 	Tag:                   "env",
 	SliceSeparator:        ",",
 	AutoFormatMissingKeys: true,
@@ -67,7 +67,7 @@ var DefualtSetParams = &SetParams{
 func (p *SetParams) Copy() *SetParams {
 	return &SetParams{
 		Prefix:                p.Prefix,
-		Sep:                   p.Sep,
+		Separator:             p.Separator,
 		Tag:                   p.Tag,
 		SliceSeparator:        p.SliceSeparator,
 		AutoFormatMissingKeys: p.AutoFormatMissingKeys,
@@ -83,9 +83,9 @@ func WithPrefix(prefix string) setParamsOpt {
 	}
 }
 
-func WithSep(sep string) setParamsOpt {
+func WithSeparator(separator string) setParamsOpt {
 	return func(p *SetParams) {
-		p.Sep = sep
+		p.Separator = separator
 	}
 }
 
@@ -163,7 +163,7 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 	}
 	if tg.Name != "" {
 		if envKey != "" {
-			envKey += c.Sep
+			envKey += c.Separator
 		}
 		envKey += tg.Name
 	}
@@ -267,7 +267,7 @@ func (c *SetParams) setStruct(val string, value reflect.Value, field reflect.Str
 	nPrefix := prefix
 	if tg.Name != "" {
 		if nPrefix != "" {
-			nPrefix += c.Sep
+			nPrefix += c.Separator
 		}
 		nPrefix += tg.Name
 	}
