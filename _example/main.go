@@ -16,7 +16,7 @@ type Config struct {
 			// Default values are separated by spaces
 			AllowedMethods []string `env:",default=GET POST PUT DELETE"`
 			// Add custom default value separator
-			AllowedHeaders []string `env:",default=Content-Type|Authorization,sep=|"`
+			AllowedHeaders []string `env:",default=Content-Type|Authorization,dsep=|"`
 		}
 	}
 
@@ -41,7 +41,7 @@ func main() {
 	maxConnections := env.MustGet[int]("MAX_CONNECTIONS,default=100")
 	fmt.Println("Max connections:", maxConnections) // 100
 
-	mystrings := env.MustGet[[]myString]("MY_STRING,default=hello world|welcome home,sep=|")
+	mystrings := env.MustGet[[]myString]("MY_STRING,default=hello world|welcome home,dsep=|")
 	fmt.Println("[]MyString: ", mystrings) // ["hello world!" "welcome home!"]
 
 	pointer1 := env.MustGet[*int]("NUM1")

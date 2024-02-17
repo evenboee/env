@@ -21,6 +21,7 @@ type tag struct {
 	Name                  string
 	Default               string
 	Required              bool
+	SliceSeparator        *string
 	DefaultValueSeparator string
 	SkipOnNoValue         bool
 }
@@ -49,12 +50,14 @@ func parseTag(s string) (tag, error) {
 		default:
 			vs := strings.SplitN(part, "=", 2)
 			if len(vs) != 2 {
-				continue
+				vs = append(vs, "")
 			}
 			switch vs[0] {
 			case "default":
 				tg.Default = vs[1]
 			case "separator", "sep":
+				tg.SliceSeparator = &vs[1]
+			case "default-separator", "dsep":
 				tg.DefaultValueSeparator = vs[1]
 			default:
 				panic(&UnknownTagPartError{

@@ -49,7 +49,7 @@ type SetParams struct {
 	Prefix                string
 	Sep                   string
 	Tag                   string
-	ArrSep                string
+	SliceSeparator        string
 	AutoFormatMissingKeys bool
 
 	tags reflect.StructTag
@@ -59,7 +59,7 @@ var DefualtSetParams = &SetParams{
 	Prefix:                "",
 	Sep:                   "_",
 	Tag:                   "env",
-	ArrSep:                ",",
+	SliceSeparator:        ",",
 	AutoFormatMissingKeys: true,
 	tags:                  "",
 }
@@ -69,7 +69,7 @@ func (p *SetParams) Copy() *SetParams {
 		Prefix:                p.Prefix,
 		Sep:                   p.Sep,
 		Tag:                   p.Tag,
-		ArrSep:                p.ArrSep,
+		SliceSeparator:        p.SliceSeparator,
 		AutoFormatMissingKeys: p.AutoFormatMissingKeys,
 		tags:                  p.tags,
 	}
@@ -95,9 +95,9 @@ func WithTag(tag string) setParamsOpt {
 	}
 }
 
-func WithArrSep(arrSep string) setParamsOpt {
+func WithSliceSeparator(sliceSeparator string) setParamsOpt {
 	return func(p *SetParams) {
-		p.ArrSep = arrSep
+		p.SliceSeparator = sliceSeparator
 	}
 }
 
@@ -188,8 +188,12 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 		}
 	}
 
-	// c.ArrSep should be tag option
-	val := strings.Split(valS, c.ArrSep)
+	sep := c.SliceSeparator
+	if tg.SliceSeparator != nil {
+		sep = *tg.SliceSeparator
+	}
+
+	val := strings.Split(valS, sep)
 
 	switch value.Kind() {
 	case reflect.Slice:
