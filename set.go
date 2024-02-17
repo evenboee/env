@@ -158,6 +158,9 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 	}
 
 	envKey := prefix
+	if tg.OmitStructPrefix {
+		envKey = c.Prefix
+	}
 	if tg.Name != "" {
 		if envKey != "" {
 			envKey += c.Sep

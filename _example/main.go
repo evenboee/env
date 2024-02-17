@@ -9,7 +9,7 @@ import (
 
 type Config struct {
 	API struct {
-		Port string `env:"PORT,default=8080"`
+		Port string `env:"PORT,default=8080,osp"`
 		Cors struct {
 			// Can set key explicitly, but it will be inferred from the field name if not
 			AllowedOrigins []string `env:"ALLOWED_ORIGINS,default=*"`

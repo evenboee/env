@@ -24,6 +24,7 @@ type tag struct {
 	SliceSeparator        *string
 	DefaultValueSeparator string
 	SkipOnNoValue         bool
+	OmitStructPrefix      bool
 }
 
 func parseTag(s string) (tag, error) {
@@ -47,6 +48,8 @@ func parseTag(s string) (tag, error) {
 			tg.Required = true
 		case "skip_on_no_value", "snv":
 			tg.SkipOnNoValue = true
+		case "omit_struct_prefix", "osp":
+			tg.OmitStructPrefix = true
 		default:
 			vs := strings.SplitN(part, "=", 2)
 			if len(vs) != 2 {
