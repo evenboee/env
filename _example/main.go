@@ -30,8 +30,6 @@ type Config struct {
 }
 
 func main() {
-	env.MustLoad("_example/.env") // Load since path is not .env
-
 	conf := env.MustBind[Config]()
 	fmt.Printf("%+v\n", conf)
 

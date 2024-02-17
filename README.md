@@ -1,6 +1,6 @@
 # env
 
-Wrapper for [godotenv](https://github.com/joho/godotenv) with extra functionality to bind to values. 
+Bind env variables to values. Works well with [godotenv](https://github.com/joho/godotenv). 
 
 Binding functions are heavily inspired by the [gin](https://github.com/gin-gonic/gin) binding package. 
 
@@ -13,7 +13,7 @@ Supported types:
 - arrays
 - slices
 - structs
-- time.Time and time.Duration
+- special handling for time.Time and time.Duration
 
 ## set parameters
 
