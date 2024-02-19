@@ -369,6 +369,10 @@ func setFloatField(val string, value reflect.Value, field reflect.StructField) e
 }
 
 func setTimeDuration(val string, value reflect.Value) error {
+	if val == "" {
+		val = "0s"
+	}
+
 	d, err := time.ParseDuration(val)
 	if err != nil {
 		return err
