@@ -257,7 +257,7 @@ func (c *SetParams) setWithType(value reflect.Value, field reflect.StructField, 
 			value.Set(reflect.New(value.Type().Elem()))
 		}
 
-		return c.setValue(value.Elem(), field, "", val)
+		return c.setValue(value.Elem(), field, prefix, val)
 	}
 
 	return &UnsupportedTypeError{Type: value.Type()}, false
