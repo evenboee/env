@@ -12,17 +12,16 @@ import (
 // - "Name" -> "NAME"
 // - "AllowedOrigins" -> "ALLOWED_ORIGINS"
 // - "TestA" -> "TEST_A"
+// - "UserID" -> "USER_ID"
 func formatName(name string) string {
 	var result strings.Builder
 	l := len(name) - 1
-	for i, r := range name {
-		// if current letter is uppercase, not first,
-		//   and next letter is lowercase
-		//   or if letter is last and previous letter is lowercase:
-		//   insert _ before current letter
-		if unicode.IsUpper(r) && i != 0 &&
-			(i < l && unicode.IsLower(rune(name[i+1])) ||
-				i == l && unicode.IsLower(rune(name[i-1]))) {
+
+	result.WriteRune(rune(name[0]))
+	for i := 1; i < len(name); i++ {
+		r := rune(name[i])
+		if unicode.IsUpper(r) && (unicode.IsLower(rune(name[i-1])) ||
+			(i < l && unicode.IsLower(rune(name[i+1])))) {
 			result.WriteRune('_')
 		}
 		result.WriteRune(r)
