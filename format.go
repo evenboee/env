@@ -14,6 +14,10 @@ import (
 // - "TestA" -> "TEST_A"
 // - "UserID" -> "USER_ID"
 func formatName(name string) string {
+	if len(name) == 0 {
+		return ""
+	}
+
 	var result strings.Builder
 	l := len(name) - 1
 

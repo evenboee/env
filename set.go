@@ -146,12 +146,6 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 	)
 
 	tagValue := field.Tag.Get(c.Tag)
-	if tagValue == "" {
-		tagValue = field.Name
-	} else if tagValue == "-" {
-		return nil, false
-	}
-
 	if Debug {
 		fmt.Printf("tag value for %q: %s\n", field.Name, tagValue)
 	}
@@ -160,9 +154,14 @@ func (c *SetParams) setValue(value reflect.Value, field reflect.StructField, pre
 	if err != nil {
 		return err, false
 	}
-
-	if tg.Name == tagValue && c.AutoFormatMissingKeys {
-		tg.Name = formatName(tg.Name)
+	if tg.Name == "" {
+		if c.AutoFormatMissingKeys {
+			tg.Name = formatName(field.Name)
+		} else {
+			tg.Name = field.Name
+		}
+	} else if tg.Name == "-" {
+		return nil, false
 	}
 
 	if Debug {
